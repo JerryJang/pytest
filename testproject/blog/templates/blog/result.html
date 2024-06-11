@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recognition Result</title>
+</head>
+<body>
+    <h1>Recognition Result</h1>
+    <ul>
+        {% for note, time in notes %}
+        <li>Note: {{ note }} at {{ time }} seconds</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'index' %}">Back to Home</a>
+</body>
+</html>
