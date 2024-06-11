@@ -5,6 +5,8 @@ import numpy as np
 import struct
 import io
 import math
+from scipy.signal import butter, lfilter
+
 
 async def recognize_notes(websocket, path):
     async for message in websocket:
@@ -27,11 +29,35 @@ def process_audio(wf):
         sound = np.zeros(nb_frame)
         for i in range(nb_frame):
             wdata = paquet_frame[i]
-            data = struct.unpack("<h", wdata)
+            data = struct.unpack("<h", wdata)  # Assuming 16-bit PCM data
             sound[i] = int(data[0])
 
-        print(f"Sound data: {sound[:10]}")  # 디버그 출력
-        sound = np.divide(sound, float(2**15))
+        print(f"Sound data before scaling: {sound[:10]}")  # 디버그 출력
+        sound = np.divide(sound, float(2**15))  # Scale to range -1 to 1
+        print(f"Sound data after scaling: {sound[:10]}")  # 디버그 출력
+
+        # Apply moving average filter to smooth the signal
+        window_size = 5
+        sound = np.convolve(sound, np.ones(window_size)/window_size, mode='valid')
+
+        # Apply a band-pass filter to isolate piano frequencies (27.5 Hz to 4186 Hz)
+        freq_low = 16.35
+        freq_high = 8000.0
+        nyquist = 0.5 * f_s
+        low = freq_low / nyquist
+        high = freq_high / nyquist
+
+        def butter_bandpass(lowcut, highcut, fs, order=5):
+            b, a = butter(order, [lowcut, highcut], btype='band')
+            return b, a
+
+        def bandpass_filter(data, lowcut, highcut, fs, order=5):
+            b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+            y = lfilter(b, a, data)
+            return y
+
+        sound = bandpass_filter(sound, low, high, f_s, order=6)
+
         fourier = np.fft.fft(sound)
         fourier = np.absolute(fourier)
         imax = np.argmax(fourier[0:int(nb_frame / 2)])
@@ -50,6 +76,11 @@ def process_audio(wf):
         imax = np.argmax(fourier[0:i_end + 100])
 
         freq = (imax * f_s) / (nb_frame * 1)
+
+        # Frequency range for piano notes (27.5 Hz to 4186 Hz)
+        if freq < 16.35 or freq > 8000.0:
+            return None, 0
+
         note = 0
         name = np.array(
             ["C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0",
@@ -107,17 +138,18 @@ def process_audio(wf):
     cpt = 0
     for i in range(0, int(wf.getnframes() / wf.getnchannels())):
         cpt += 1
-        if cpt % 1000 == 0:  # 디버그 출력
-            print(f"Processing frame {i}, cpt = {cpt}")
+
         leframe = wf.readframes(1)
         allframes.append(leframe)
         tmpframes.append(leframe)
-        if cpt == 1000:
+        if cpt == int(wf.getnframes() / wf.getnchannels()):
             print(f"Calling note_detect with {len(tmpframes)} frames")  # 디버깅 출력
-            note, amplitude = note_detect(tmpframes, 1000, wf.getframerate())
+            note, amplitude = note_detect(tmpframes, int(wf.getnframes() / wf.getnchannels()), wf.getframerate())
+            if note is None:
+                continue
             current_time = i * frame_duration
             print(f"Detected note: {note}, amplitude: {amplitude}")  # 디버깅을 위한 출력
-            if amplitude >= 0.01 and (former_amplitude + 0.001) <= amplitude:
+            if amplitude >= 0.9 and (former_amplitude + 0.001) <= amplitude:
                 if note != former_note or (note == former_note and (former_note_amplitude + 0.01) < amplitude):
                     notes.append(note)
                     notes_times.append([note, round(current_time, 2)])
