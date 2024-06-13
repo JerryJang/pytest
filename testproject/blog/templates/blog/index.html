@@ -1,122 +1,139 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Piano Sound Recognition</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <h1>Piano Sound Recognition</h1>-->
+<!--    <button id="startButton">Start</button>-->
+<!--    <button id="stopButton" disabled>Stop</button>-->
+<!--    <p id="status"></p>-->
+<!--    <div id="result"></div>-->
+
+<!--    <script>-->
+<!--        let socket = new WebSocket('ws://localhost:5000');-->
+<!--        let audioContext;-->
+<!--        let recorder;-->
+<!--        let isRecording = false;-->
+<!--        let count = 0;-->
+<!--        let lastData = null;-->
+
+<!--        document.getElementById('startButton').onclick = async () => {-->
+<!--            audioContext = new (window.AudioContext || window.webkitAudioContext)();-->
+<!--            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });-->
+<!--            const input = audioContext.createMediaStreamSource(stream);-->
+<!--            recorder = audioContext.createScriptProcessor(1024, 1, 1);-->
+
+<!--            recorder.onaudioprocess = (e) => {-->
+<!--                if (!isRecording) return;-->
+<!--                const inputData = e.inputBuffer.getChannelData(0);-->
+<!--                const float32Buffer = new Float32Array(inputData);-->
+<!--                socket.send(float32Buffer.buffer);-->
+<!--            };-->
+
+<!--            input.connect(recorder);-->
+<!--            recorder.connect(audioContext.destination);-->
+
+<!--            isRecording = true;-->
+<!--            document.getElementById('startButton').disabled = true;-->
+<!--            document.getElementById('stopButton').disabled = false;-->
+<!--            document.getElementById('status').innerText = "Recording and sending audio...";-->
+<!--        };-->
+
+<!--        document.getElementById('stopButton').onclick = () => {-->
+<!--            isRecording = false;-->
+<!--            recorder.disconnect();-->
+<!--            document.getElementById('startButton').disabled = false;-->
+<!--            document.getElementById('stopButton').disabled = true;-->
+<!--            document.getElementById('status').innerText = "Stopped.";-->
+<!--        };-->
+
+<!--        socket.onmessage = (event) => {-->
+<!--            const resultDiv = document.getElementById('result');-->
+<!--            const currentData = event.data;-->
+
+<!--            console.log(typeof event.data);-->
+
+<!--            document.getElementById('status').innerText = `인식된 음 : ${currentData}`;-->
+
+<!--            if (currentData === lastData) {-->
+<!--                count++;-->
+<!--            } else {-->
+<!--                count = 1;-->
+<!--                lastData = currentData;-->
+<!--            }-->
+
+<!--            if (count >= 3) {-->
+<!--                resultDiv.innerText += `${currentData}\n`;-->
+<!--                console.log(`Debug: Repeated ${count} times: ${currentData}\n`);-->
+<!--                count = 0;  // Reset count after displaying the message-->
+<!--            }-->
+<!--        };-->
+
+<!--        socket.onerror = (error) => {-->
+<!--            console.log('WebSocket Error: ', error);-->
+<!--            document.getElementById('status').innerText = 'WebSocket Error: ' + error;-->
+<!--        };-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-time Audio Recognition</title>
+    <title>Piano Sound Recognition</title>
 </head>
 <body>
-    <h1>Real-time Audio Recognition</h1>
-    <button id="startButton">Start Recognition</button>
-    <button id="stopButton" disabled>Stop Recognition</button>
-    <div id="result"></div>
+    <h1>Piano Sound Recognition</h1>
+    <button id="startButton">Start</button>
+    <button id="stopButton" disabled>Stop</button>
+    <p id="status"></p>
 
     <script>
+        let socket = new WebSocket('ws://localhost:5000');
+        let audioContext;
+        let recorder;
         let isRecording = false;
-        let socket;
-        let mediaRecorder;
-        document.getElementById('startButton').addEventListener('click', async () => {
-            if (isRecording) return;
 
-            socket = new WebSocket('ws://localhost:5000');
-
-            socket.onopen = () => {
-                console.log('WebSocket is open now.');
-            };
-
-            socket.onmessage = (event) => {
-                const resultDiv = document.getElementById('result');
-                if(event.data != "Recognized notes: []") {
-                    resultDiv.innerHTML += `<p>${event.data}</p>`;
-                }
-            };
-
-            // socket.onmessage = (event) => {
-            // const resultDiv = document.getElementById('result');
-            // //const data = JSON.parse(event.data); // Assuming event.data is a JSON string
-            // if ( event.data.notes.length > 0) {
-            // resultDiv.innerHTML += `<p>${event.data}</p>`;
-        // }
-
-//             socket.onmessage = (event) => {
-//                 const notes = data.match(/Recognized notes: (\[.*\])/);
-//                 if (notes && notes[1] !== '[]') {
-//                 resultDiv.innerHTML += `<p>${event.data}</p>`;
-//         }
-// };
-
-            socket.onclose = () => {
-                console.log('WebSocket is closed now.');
-            };
-
-            socket.onerror = (error) => {
-                console.error('WebSocket error:', error);
-            };
-
+        document.getElementById('startButton').onclick = async () => {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
+            const input = audioContext.createMediaStreamSource(stream);
+            recorder = audioContext.createScriptProcessor(1024, 1, 1);
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0 && socket.readyState === WebSocket.OPEN) {
-                    event.data.arrayBuffer().then(buffer => {
-                        const wavBuffer = createWavHeader(buffer, event.data.size);
-                        socket.send(wavBuffer);
-                    });
-                }
+            recorder.onaudioprocess = (e) => {
+                if (!isRecording) return;
+                const inputData = e.inputBuffer.getChannelData(0);
+                const float32Buffer = new Float32Array(inputData);
+                socket.send(float32Buffer.buffer);
             };
 
-            mediaRecorder.start(100); // Send data every 100ms
+            input.connect(recorder);
+            recorder.connect(audioContext.destination);
+
             isRecording = true;
             document.getElementById('startButton').disabled = true;
             document.getElementById('stopButton').disabled = false;
-        });
+            document.getElementById('status').innerText = "Recording and sending audio...";
+        };
 
-        document.getElementById('stopButton').addEventListener('click', () => {
-            if (!isRecording) return;
-
-            mediaRecorder.stop();
-            socket.close();
+        document.getElementById('stopButton').onclick = () => {
             isRecording = false;
+            recorder.disconnect();
             document.getElementById('startButton').disabled = false;
             document.getElementById('stopButton').disabled = true;
-        });
+            document.getElementById('status').innerText = "Stopped.";
+        };
 
-        function createWavHeader(buffer, dataSize) {
-            const header = new ArrayBuffer(44);
-            const view = new DataView(header);
+        socket.onmessage = (event) => {
+            document.getElementById('status').innerText = event.data;
+        };
 
-            /* RIFF identifier */
-            view.setUint32(0, 1380533830, false);
-            /* file length */
-            view.setUint32(4, 36 + dataSize, true);
-            /* RIFF type */
-            view.setUint32(8, 1463899717, false);
-            /* format chunk identifier */
-            view.setUint32(12, 1718449184, false);
-            /* format chunk length */
-            view.setUint32(16, 16, true);
-            /* sample format (raw) */
-            view.setUint16(20, 1, true);
-            /* channel count */
-            view.setUint16(22, 1, true);
-            /* sample rate */
-            view.setUint32(24, 44100, true);
-            /* byte rate (sample rate * block align) */
-            view.setUint32(28, 44100 * 2, true);
-            /* block align (channel count * bytes per sample) */
-            view.setUint16(32, 2, true);
-            /* bits per sample */
-            view.setUint16(34, 16, true);
-            /* data chunk identifier */
-            view.setUint32(36, 1684108385, false);
-            /* data chunk length */
-            view.setUint32(40, dataSize, true);
+        socket.onerror = (error) => {
+            console.log('WebSocket Error: ', error);
 
-            const combined = new Uint8Array(header.byteLength + buffer.byteLength);
-            combined.set(new Uint8Array(header), 0);
-            combined.set(new Uint8Array(buffer), header.byteLength);
-            return combined;
-        }
+        };
     </script>
 </body>
 </html>
