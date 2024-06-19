@@ -12,28 +12,29 @@
 -> 
 
 # 사용된 모듈 
->>> 파이썬 3.9.6 버전
->>> Django 프레임워크
->>> librosa, pyaudio, portaudio, aubio 라이브러리 등
->>> 기타 pip list 를 하고, 구현 과정 중 설치를 한 것 같은 리스트를 추려서 첨부합니다.
->>> 해당 라이브러리나, 코드 실행중 문제가 생긴다면 오류 메시지에 맞게 라이브러리를 설치하면 됩니다.
->>> 아키텍쳐 차이 ~ 윈도우, 맥 (Arm64과 Intel 기반에 지원이 되는 라이브러리와 되지 않는 라이브러리가 있다면
->>> 실행이 가능하게 되는 rosseta2, bosh 등의 확장도구를 사용하여야합니다. ) 
-Package                      Version
----------------------------- -----------
-aubio                        0.4.9
-audiofile                    1.4.0
-celery                       5.4.0
-cffi                         1.16.0
-channels                     4.1.0
-Django                       5.0.3
-djangorestframework          3.15.1
-librosa                      0.10.2
-numpy                        1.26.4
-PyAudio                      0.2.8
-sounddevice                  0.4.7
-virtualenv                   20.26.0
-wheel                        0.43.0
+> 파이썬 3.9.6 버전
+> Django 프레임워크
+> librosa, pyaudio, portaudio, aubio 라이브러리 등
+> 기타 pip list 를 하고, 구현 과정 중 설치를 한 것 같은 리스트를 추려서 첨부합니다.
+> 해당 라이브러리나, 코드 실행중 문제가 생긴다면 오류 메시지에 맞게 라이브러리를 설치하면 됩니다.
+> 아키텍쳐 차이 ~ 윈도우, 맥 (Arm64과 Intel 기반에 지원이 되는 라이브러리와 되지 않는 라이브러리가 있다면
+> 실행이 가능하게 되는 rosseta2, bosh 등의 확장도구를 사용하여야합니다. )
+
+> Package                      Version
+> ---------------------------- -----------
+> aubio                        0.4.9
+> audiofile                    1.4.0
+> celery                       5.4.0
+> cffi                         1.16.0
+> channels                     4.1.0
+> Django                       5.0.3
+> djangorestframework          3.15.1
+> librosa                      0.10.2
+> numpy                        1.26.4
+> PyAudio                      0.2.8
+> sounddevice                  0.4.7
+> virtualenv                   20.26.0
+> wheel                        0.43.0
 
 # 코드 단위 설명 
 
