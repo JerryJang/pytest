@@ -36,7 +36,9 @@
 > virtualenv                   20.26.0
 > wheel                        0.43.0
 
-# 파일 트리 <img width="380" alt="스크린샷 2024-06-19 오후 8 34 08" src="https://github.com/JerryJang/pytest/assets/25243469/82149b51-52a6-4f61-a709-fb7a9347c168">
+# 파일 트리 
+<img width="380" alt="스크린샷 2024-06-19 오후 8 34 08" src="https://github.com/JerryJang/pytest/assets/25243469/82149b51-52a6-4f61-a709-fb7a9347c168">
+
 
 # 함수 단위 설명 
 1. detect_pitch_and_amplitude(samples, samplerate)
@@ -93,7 +95,7 @@ note_detect 함수, detect_pitch_and_amplitude 에 전송하여서 음을 인식
 계정 정보는 사용자 설정에 따르고, 
 <img width="801" alt="스크린샷 2024-06-19 오후 8 15 24" src="https://github.com/JerryJang/pytest/assets/25243469/515b71e9-6e55-4027-8949-41b9de36897c">
 장고 model.py 에서 작성한 ERD 를 확인할 수 있습니다. 실제 작동한다면 (악보나, 음성인식) 파일을 업로드하면 다음과 같은 경로에 추가되어 서버PC에 저장이 됩니다. <img width="309" alt="스크린샷 2024-06-19 오후 8 16 51" src="https://github.com/JerryJang/pytest/assets/25243469/dec060b9-6939-4227-a94a-574c442f71b9">
-> pytest/media/{각자 경로}  /audio~음악파일 , image~악보타이틀 이미지, sheet_music~악보 
+> pytest/media/{각자 경로}  /'audio' 음악파일 , 'image'악보타이틀 이미지, 'sheet_music'악보 
 
 # 작동에 관하여 (테스트)
 1. 실행
