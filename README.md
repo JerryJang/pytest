@@ -62,6 +62,8 @@
 콘솔 창이 2개 필요합니다. 우선 경로에 맞게 들어갑니다.
 첫번째 경로는 ~/testproject/ 입니다.
 > python3 manage.py runserver
+
+
 두번째 경로는 ~/testproject/blog/
 > python3  python3 websocket_server.py
 
